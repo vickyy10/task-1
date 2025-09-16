@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="content-header">
+    <h2>Task Reports</h2>
+    <p class="text-muted">View completion reports and worked hours</p>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="userFilter" class="form-label">User</label>
+                <select class="form-select" id="userFilter" name="user">
+                    <option value="">All Users</option>
+                    {% for user in report_users %}
+                    <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"s" %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="dateFromFilter" class="form-label">From Date</label>
+                <input type="date" class="form-control" id="dateFromFilter" name="date_from" 
+                       value="{{ request.GET.date_from }}">
+            </div>
+            <div class="col-md-3">
+                <label for="dateToFilter" class="form-label">To Date</label>
+                <input type="date" class="form-control" id="dateToFilter" name="date_to" 
+                       value="{{ request.GET.date_to }}">
+            </div>
+            <div class="col-md-3 d-flex align-items-end">
+                <button type="submit" class="btn btn-primary me-2">Apply Filters</button>
+                <a href="{% url 'reports' %}" class="btn btn-outline-secondary">Clear</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ total_completed_tasks }}</h5>
+                <p class="card-text">Completed Tasks</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ total_worked_hours|floatformat:2 }}</h5>
+                <p class="card-text">Total Worked Hours</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ avg_hours_per_task|floatformat:2 }}</h5>
+                <p class="card-text">Avg Hours per Task</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table

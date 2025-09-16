@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">Task Details</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'task_list' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Back to Tasks
+        </a>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Title:</div>
+                    <div class="col-sm-9">{{ task.title }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Description:</div>
+                    <div class="col-sm-9">{{ task.description|default:"No description" }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Assigned To:</div>
+                    <div class="col-sm-9">{{ task.assigned_to.username }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Due Date:</div>
+                    <div class="col-sm-9">{{ task.due_date|date:"M d, Y H:i" }}</div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Status:</div>
+                    <div class="col-sm-9">
+                        <span class="badge bg-{% if task.status == 'completed' %}success{% elif task.status == 'in_progress' %}info{% else %}warning{% endif %}">
+                            {{ task.get_status_display }}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Created By:</div>
+                    <div class="col-sm-9">{{ task.created_by.username }} on {{ task.created_at|date:"M d, Y H:i" }}</div>
+                </div>
+                
+                {% if task.started_at %}
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Started At:</div>
+                    <div class="col-sm-9">{{ task.started_at|date:"M d, Y H:i" }}</div>
+                </div>
+                {% endif %}
+                
+                {% if task.completed_at %}
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Completed At:</div>
+                    <div class="col-sm-9">{{ task.completed_at|date:"M d, Y H:i" }}</div>
+                </div>
+                {% endif %}
+                
+                {% if task.worked_hours %}
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Worked Hours:</div>
+                    <div class="col-sm-9">{{ task.worked_hours }} hours</div>
+                </div>
+                {% endif %}
+                
+                {% if task.completion_report %}
+                <div class="row mb-3">
+                    <div class="col-sm-3 fw-bold">Completion Report:</div>
+                    <div class="col-sm-9">{{ task.completion_report }}</div>
+                </div>
+                {% endif %}
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                    <a href="{% url 'task_list' %}" class="btn btn-secondary me-md-2">Back</a>
+                    <a href="{% url 'task_edit' task.id %}" class="btn btn-primary">Edit Task</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

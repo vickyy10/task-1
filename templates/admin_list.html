@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">Admin Management</h1>
+    <div class="btn-toolbar mb-2 mb-md-0">
+        <a href="{% url 'user_create' %}" class="btn btn-sm btn-primary">
+            <i class="bi bi-plus-circle"></i> Add New Admin
+        </a>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-6">
+                <form method="get" class="row g-2">
+                    <div class="col-md-5">
+                        <select name="status" class="form-select">
+                            <option value="">All Status</option>
+                            <option value="active" {% if request.GET.status == 'active' %}selected{% endif %}>Active</option>
+                            <option value="inactive" {% if request.GET.status == 'inactive' %}selected{% endif %}>Inactive</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Assigned Users</th>
+                        <th>Actions</th>
+
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin in admins %}
+                    <tr>
+                        <td>{{ admin.username }}</td>
+                        <td>{{ admin.get_full_name }}</td>
+                        <td>{{ admin.email }}</td>
+                        <td>
+                            <span class="badge bg-{% if admin.is_active %}success{% else %}danger{% endif %}">
+                                {% if admin.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                        </td>
+                        <td>{{ admin.date_joined|date:"M d, Y" }}</td>
+                        <td>
+                           {% for user in admin.managed_users.all %}
+                                <span class="badge bg-secondary">{{ user.username }}</span>
+                            {% empty %}
+                                <span class="text-muted">No users</span>
+                            {% endfor %}
+
+                        </td>
+
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button type="button" class="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#userModal" data-user-id="{{ user.id }}">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <a href="{% url 'user_edit' admin.id %}" class="btn btn-outline-primary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <form method="post" action="{% url 'admin_toggle_active' admin.id %}" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-{% if user.is_active %}warning{% else %}success{% endif %}">
+                                        <i class="bi bi-{% if user.is_active %}x-circle{% else %}check-circle{% endif %}"></i>
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteModal" data-user-id="{{ user.id }}" data-user-name="{{ user.username }}">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </td>
+                        
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center py-4">No admins found.</td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <nav aria-label="Admin pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if admins.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ admins.previous_page_number }}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in admins.paginator.page_range %}
+                <li class="page-item {% if admins.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if admins.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ admins.next_page_number }}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}

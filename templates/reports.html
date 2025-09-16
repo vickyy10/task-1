@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+    <h1 class="h2">Reports</h1>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card card-stat text-center">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-check-circle text-success"></i></h5>
+                <h3 class="card-text">{{ total_completed_tasks }}</h3>
+                <p class="card-text text-muted">Completed Tasks</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stat text-center">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-clock text-info"></i></h5>
+                <h3 class="card-text">{{ total_worked_hours }}</h3>
+                <p class="card-text text-muted">Total Hours Worked</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-stat text-center">
+            <div class="card-body">
+                <h5 class="card-title"><i class="bi bi-bar-chart text-primary"></i></h5>
+                <h3 class="card-text">{{ avg_hours_per_task|floatformat:2 }}</h3>
+                <p class="card-text text-muted">Avg Hours Per Task</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <div class="row">
+            <div class="col-md-8">
+                <form method="get" class="row g-2">
+                    <div class="col-md-3">
+                        <select name="user" class="form-select">
+                            <option value="">All Users</option>
+                            {% for user in report_users %}
+                            <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"s" %}selected{% endif %}>{{ user.username }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="date_from" class="form-control" value="{{ request.GET.date_from }}" placeholder="From Date">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="date_to" class="form-control" value="{{ request.GET.date_to }}" placeholder="To Date">
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-outline-primary w-100">Apply Filters</button>
+                    </div>
+                </form>
+            </div>
+            {% comment %} <div class="col-md-4 text-end">
+                <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}export=csv" class="btn btn-sm btn-success">
+                    <i class="bi bi-download"></i> Export CSV
+                </a>
+            </div> {% endcomment %}
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Task</th>
+                        <th>Assigned To</th>
+                        <th>Due Date</th>
+                        <th>Worked Hours</th>
+                        <th>Completion Report</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for task in tasks %}
+                    <tr>
+                        <td>{{ task.title }}</td>
+                        <td>{{ task.assigned_to.username }}</td>
+                        <td>{{ task.due_date|date:"M d, Y H:i" }}</td>
+                        <td>{{ task.worked_hours|default:"0" }}</td>
+                        <td class="text-truncate" style="max-width: 200px;">{{ task.completion_report|default:"-" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4">No completed tasks found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer">
+        <nav aria-label="Report pagination">
+            <ul class="pagination justify-content-center mb-0">
+                {% if tasks.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ tasks.previous_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Previous</a>
+                </li>
+                {% endif %}
+                
+                {% for num in tasks.paginator.page_range %}
+                <li class="page-item {% if tasks.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">{{ num }}</a>
+                </li>
+                {% endfor %}
+                
+                {% if tasks.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ tasks.next_page_number }}{% for key, value in request.GET.items %}{% if key != 'page' %}&{{ key }}={{ value }}{% endif %}{% endfor %}">Next</a>
+                </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+</div>
+{% endblock %}
